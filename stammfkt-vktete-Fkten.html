@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mathe-Schreck | Stammfunktions-Akademie – Lineare Verkettung</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: {
+        brand: ['Creepster','Impact','Arial Black','sans-serif'],
+        body: ['Inter','system-ui','sans-serif']
+      } } }
+    };
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+  <style>
+    :root { --transition: all 0.3s ease; }
+    * { transition: var(--transition); }
+
+    body { background:#ffffff; color:#000000; font-family:'Inter',system-ui,sans-serif; }
+    .accent-cyan{color:#0088cc;} .accent-pink{color:#cc0088;}
+    .accent-green{color:#008800;} .accent-red{color:#cc0000;}
+
+    .card { background:#f8f9fa; border:1px solid #e0e0e0; }
+    .input-field { background:#fff; border:2px solid #d0d0d0; color:#000; }
+    .input-field:focus { border-color:#0088cc; box-shadow:0 0 0 3px rgba(0,136,204,.2); }
+    .input-field:disabled { opacity:.55; cursor:not-allowed; }
+    .keypad-btn { background:#f0f0f0; border:1px solid #d0d0d0; color:#000; }
+    .keypad-btn:hover { background:#e0e0e0; }
+    .keypad-btn:active { background:#d0d0d0; }
+
+    .dark body { background:#000; color:#fff; }
+    .dark .accent-cyan{color:#00ffff;text-shadow:0 0 10px rgba(0,255,255,.5);}
+    .dark .accent-pink{color:#ff00ff;text-shadow:0 0 10px rgba(255,0,255,.5);}
+    .dark .accent-green{color:#00ff00;text-shadow:0 0 10px rgba(0,255,0,.5);}
+    .dark .accent-red{color:#ff0000;text-shadow:0 0 10px rgba(255,0,0,.5);}
+    .dark .card { background:#0a0a0a; border:1px solid #333; box-shadow:0 0 20px rgba(0,255,255,.05); }
+    .dark .input-field { background:#111; border:2px solid #333; color:#fff; }
+    .dark .input-field:focus { border-color:#00ffff; box-shadow:0 0 0 3px rgba(0,255,255,.2); }
+    .dark .keypad-btn { background:#1a1a1a; border:1px solid #444; color:#fff; }
+    .dark .keypad-btn:hover { background:#222; border-color:#00ffff; box-shadow:0 0 10px rgba(0,255,255,.2); }
+
+    .brand-title { font-family:'Creepster','Impact','Arial Black',sans-serif; letter-spacing:2px; }
+
+    .progress-dot { width:12px; height:12px; border-radius:50%; }
+    .progress-dot.inactive { background:transparent; border:2px solid #666; }
+    .progress-dot.completed { background:#008800; border:2px solid #008800; }
+    .dark .progress-dot.completed { background:#00ff00; border-color:#00ff00; box-shadow:0 0 8px rgba(0,255,0,.5); }
+    .progress-dot.current { background:#0088cc; border:2px solid #0088cc; animation:pulse-dot 1.5s infinite; }
+    .dark .progress-dot.current { background:#00ffff; border-color:#00ffff; box-shadow:0 0 12px rgba(0,255,255,.6); }
+    @keyframes pulse-dot { 0%,100%{transform:scale(1);} 50%{transform:scale(1.2);} }
+
+    .btn-primary { background:#0088cc; color:#fff; font-weight:600; padding:12px 24px; border-radius:8px; min-height:44px; }
+    .btn-primary:hover { background:#006699; }
+    .btn-primary:disabled { opacity:.4; cursor:not-allowed; }
+    .dark .btn-primary { background:#00ffff; color:#000; box-shadow:0 0 20px rgba(0,255,255,.3); }
+    .btn-secondary { background:transparent; border:2px solid #0088cc; color:#0088cc; font-weight:600; padding:12px 24px; border-radius:8px; min-height:44px; }
+    .dark .btn-secondary { border-color:#00ffff; color:#00ffff; }
+    .btn-secondary:disabled { opacity:.3; cursor:not-allowed; }
+
+    .feedback-area { padding:16px; border-radius:8px; border-left:4px solid; }
+    .feedback-success { background:rgba(0,128,0,.1); border-color:#008800; color:#006600; }
+    .dark .feedback-success { background:rgba(0,255,0,.08); border-color:#00ff00; color:#00ff00; }
+    .feedback-error { background:rgba(204,0,0,.1); border-color:#cc0000; color:#990000; }
+    .dark .feedback-error { background:rgba(255,0,0,.08); border-color:#ff0000; color:#ff0000; }
+    .feedback-warning { background:rgba(204,136,0,.1); border-color:#cc8800; color:#996600; }
+    .dark .feedback-warning { background:rgba(255,200,0,.08); border-color:#ffcc00; color:#ffcc00; }
+
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.75); display:flex; align-items:center; justify-content:center; z-index:100; backdrop-filter:blur(4px); }
+    .modal-content { background:#fff; border-radius:16px; padding:28px; max-width:560px; width:92%; max-height:90vh; overflow-y:auto; }
+    .dark .modal-content { background:#111; border:1px solid #333; box-shadow:0 0 40px rgba(0,255,255,.2); }
+
+    .keypad-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+    @media (min-width:768px){ .keypad-grid { grid-template-columns:repeat(6,1fr); } }
+    .keypad-btn { min-width:44px; min-height:44px; border-radius:8px; font-size:1.05rem; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+
+    .submit-btn-glow { position:relative; }
+    .dark .submit-btn-glow:not(:disabled) { animation:pulse-glow 2s infinite; }
+    @keyframes pulse-glow { 0%,100%{box-shadow:0 0 15px rgba(0,255,255,.4);} 50%{box-shadow:0 0 35px rgba(255,0,255,.6);} }
+
+    .spinner { width:48px; height:48px; border:4px solid #ddd; border-top-color:#0088cc; border-radius:50%; animation:spin 1s linear infinite; }
+    .dark .spinner { border-color:#333; border-top-color:#00ffff; }
+    @keyframes spin { to{transform:rotate(360deg);} }
+
+    *:focus-visible { outline:3px solid #0088cc; outline-offset:2px; }
+    .dark *:focus-visible { outline-color:#00ffff; }
+    .katex { font-size:1.1em; }
+    .task-display .katex { font-size:1.5em; }
+    .eval-solution li { padding:2px 0; }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <div id="loading-screen" class="fixed inset-0 flex items-center justify-center z-50">
+    <div class="text-center">
+      <div class="spinner mx-auto mb-4"></div>
+      <p class="brand-title text-xl accent-cyan">Mathe-Schreck lädt...</p>
+    </div>
+  </div>
+
+  <div id="app" class="hidden">
+    <header class="sticky top-0 z-40 backdrop-blur-md bg-white/80 dark:bg-black/80 border-b border-gray-200 dark:border-gray-800">
+      <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <h1 class="brand-title text-lg md:text-xl accent-cyan truncate">Mathe-Schreck</h1>
+          <p class="text-xs md:text-sm opacity-70">Stammfunktions-Akademie · Lineare Verkettung</p>
+        </div>
+        <div class="flex gap-2 items-center" id="dot-bar" role="img" aria-label="Fortschritt: Aufgabe 1 von 5">
+          <div class="progress-dot" id="dot-0"></div>
+          <div class="progress-dot" id="dot-1"></div>
+          <div class="progress-dot" id="dot-2"></div>
+          <div class="progress-dot" id="dot-3"></div>
+          <div class="progress-dot" id="dot-4"></div>
+        </div>
+        <div class="flex gap-2">
+          <button id="btn-reset" class="keypad-btn !p-2" aria-label="Test zurücksetzen" title="Test zurücksetzen">🔄</button>
+          <button id="theme-toggle" class="keypad-btn !p-2" aria-label="Dark/Light Modus umschalten"><span id="theme-icon">🌙</span></button>
+          <button id="fullscreen-btn" class="keypad-btn !p-2" aria-label="Vollbild umschalten">⛶</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-6 space-y-6">
+
+      <div id="lock-banner" class="hidden card rounded-2xl p-4 text-center feedback-warning" role="alert"></div>
+
+      <section class="card rounded-2xl p-6 md:p-8 text-center task-display">
+        <p class="text-sm md:text-base mb-3 opacity-70">
+          Bilde eine Stammfunktion F(x) der linear verknüpften Funktion f(x) = a·g(bx+c)
+          (äußere Funktion: e, sin oder cos · innere Funktion: linear).
+        </p>
+        <div id="task-function" class="text-xl md:text-2xl font-semibold"></div>
+      </section>
+
+      <section class="card rounded-2xl p-6 space-y-4">
+        <label for="user-input" class="block text-sm font-semibold">Deine Stammfunktion F(x):</label>
+        <input type="text" id="user-input"
+               class="input-field w-full p-4 rounded-xl text-lg font-mono"
+               placeholder="z.B. 1/2*e^(2x+1)   oder   -2cos(2x-1)"
+               autocomplete="off" autocapitalize="off" spellcheck="false"
+               aria-label="Eingabefeld für die Stammfunktion F(x)">
+
+        <div class="p-4 rounded-xl bg-white dark:bg-neutral-900 border border-gray-200 dark:border-gray-700">
+          <p class="text-xs opacity-60 mb-1">Erkannt als:</p>
+          <div id="live-preview" class="text-lg min-h-[2em]">—</div>
+        </div>
+
+        <p class="text-xs opacity-60 italic">💡 Die Integrationskonstante <strong>+ C</strong> wird automatisch ergänzt. Du darfst sie weglassen – oder mitschreiben.</p>
+        <div id="syntax-feedback" class="text-sm min-h-[1.5em]" aria-live="polite"></div>
+      </section>
+
+      <section class="card rounded-2xl p-4" id="keypad-wrap" aria-label="Mathe-Keypad">
+        <p class="text-xs opacity-60 mb-3">Mathe-Keypad</p>
+        <div class="keypad-grid">
+          <button class="keypad-btn" data-insert="x"    aria-label="x">x</button>
+          <button class="keypad-btn" data-insert="e^("  aria-label="e hoch Klammer">e^(</button>
+          <button class="keypad-btn" data-insert="sin(" aria-label="Sinus Klammer">sin(</button>
+          <button class="keypad-btn" data-insert="cos(" aria-label="Cosinus Klammer">cos(</button>
+          <button class="keypad-btn" data-insert="+" aria-label="Plus">+</button>
+          <button class="keypad-btn" data-insert="-" aria-label="Minus">−</button>
+          <button class="keypad-btn" data-insert="*" aria-label="Mal">·</button>
+          <button class="keypad-btn" data-insert="/" aria-label="Geteilt">/</button>
+          <button class="keypad-btn" data-insert="(" aria-label="Klammer auf">(</button>
+          <button class="keypad-btn" data-insert=")" aria-label="Klammer zu">)</button>
+          <button class="keypad-btn" data-insert="^" aria-label="Hoch">^</button>
+          <button class="keypad-btn accent-red" data-action="backspace" aria-label="Zeichen löschen">⌫</button>
+          <button class="keypad-btn" data-insert="7" aria-label="7">7</button>
+          <button class="keypad-btn" data-insert="8" aria-label="8">8</button>
+          <button class="keypad-btn" data-insert="9" aria-label="9">9</button>
+          <button class="keypad-btn accent-pink" data-action="clear" aria-label="Eingabe löschen">C</button>
+          <button class="keypad-btn" data-insert="4" aria-label="4">4</button>
+          <button class="keypad-btn" data-insert="5" aria-label="5">5</button>
+          <button class="keypad-btn" data-insert="6" aria-label="6">6</button>
+          <button class="keypad-btn" data-insert="0" aria-label="0">0</button>
+          <button class="keypad-btn" data-insert="1" aria-label="1">1</button>
+          <button class="keypad-btn" data-insert="2" aria-label="2">2</button>
+          <button class="keypad-btn" data-insert="3" aria-label="3">3</button>
+          <button class="keypad-btn" data-insert="," aria-label="Komma">,</button>
+          <button class="keypad-btn accent-green md:col-span-2" data-action="confirm" aria-label="Bestätigen (Enter)">⏎</button>
+        </div>
+      </section>
+
+      <section class="flex flex-col sm:flex-row gap-4">
+        <button id="btn-confirm" class="btn-primary flex-1" aria-label="Antwort bestätigen">✓ Bestätigen</button>
+        <button id="btn-next" class="btn-secondary flex-1" disabled aria-label="Nächste Aufgabe">Nächste Aufgabe →</button>
+      </section>
+
+      <section id="feedback-section" aria-live="polite"></section>
+
+      <section id="submit-section" class="hidden card rounded-2xl p-8 text-center space-y-4">
+        <h2 class="brand-title text-2xl accent-cyan">🎉 Alle Aufgaben bearbeitet!</h2>
+        <p class="opacity-70">Jetzt bekommst du deine Auswertung und kannst die Ergebnisse an Moodle senden.</p>
+        <button id="btn-submit" class="btn-primary submit-btn-glow w-full text-lg py-4" disabled aria-label="Ergebnisse an Moodle senden">📤 Ergebnisse an Moodle senden</button>
+        <p id="submit-tooltip" class="text-xs opacity-50"></p>
+      </section>
+    </main>
+  </div>
+
+  <div id="modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-content"><div id="modal-body"></div></div>
+  </div>
+
+<script>
+/* ============================================================
+   SCORM 1.2 WRAPPER (mit Fallback)
+============================================================ */
+const SCORM = (() => {
+  let api = null, initialized = false, finished = false;
+  let sessionStart = Date.now();
+  const fallback = {};
+
+  function findAPI(win, n = 0) {
+    if (!win || n > 10) return null;
+    try {
+      if (win.API) return win.API;
+      if (win.parent && win.parent !== win) return findAPI(win.parent, n + 1);
+    } catch (e) {}
+    return null;
+  }
+  function call(fn, ...a) {
+    try { if (api && typeof api[fn] === 'function') return api[fn](...a); } catch (e) {}
+    return '';
+  }
+  function init() {
+    try {
+      api = findAPI(window);
+      if (api) initialized = (call('LMSInitialize', '') === 'true');
+    } catch (e) {}
+    sessionStart = Date.now();
+  }
+  function setValue(k, v) {
+    try { if (initialized) call('LMSSetValue', k, String(v)); } catch (e) {}
+    fallback[k] = String(v);
+    lsSet('mathe-schreck-lin2-scorm-' + k, String(v));
+  }
+  function getValue(k) {
+    try { if (initialized) return call('LMSGetValue', k); } catch (e) {}
+    return fallback[k] || '';
+  }
+  function commit() { try { if (initialized) call('LMSCommit', ''); } catch (e) {} }
+  function finish() { try { if (initialized && !finished) { call('LMSFinish', ''); finished = true; } } catch (e) {} }
+  function sessionTime() {
+    const ms = Date.now() - sessionStart;
+    const h = Math.floor(ms / 3600000), m = Math.floor(ms % 3600000 / 60000),
+          s = Math.floor(ms % 60000 / 1000), cs = Math.floor(ms % 1000 / 10);
+    const p = v => String(v).padStart(2, '0');
+    return p(h) + ':' + p(m) + ':' + p(s) + '.' + p(cs);
+  }
+  return { init, setValue, getValue, commit, finish, sessionTime, isLMS: () => initialized };
+})();
+
+function lsGet(k, d = null) { try { const v = localStorage.getItem(k); return v !== null ? JSON.parse(v) : d; } catch (e) { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+
+/* ============================================================
+   SYMBOLISCHER PARSER: Zahlen, x, e, sin, cos, exp, + - * / ^
+============================================================ */
+function preprocess(raw) {
+  let s = raw.trim();
+  s = s.replace(/([+-])?\s*[cC]\b/g, '');          // "+ C" entfernen
+  s = s.replace(/−/g, '-').replace(/–/g, '-');
+  s = s.toLowerCase();
+  s = s.replace(/·/g, '*').replace(/×/g, '*');
+  s = s.replace(/\*\*/g, '^');
+  s = s.replace(/,/g, '.');
+  return s;
+}
+
+function tokenize(s) {
+  const toks = []; let i = 0;
+  while (i < s.length) {
+    const ch = s[i];
+    if (/\s/.test(ch)) { i++; continue; }
+    if (/[0-9.]/.test(ch)) {
+      let j = i, dots = 0;
+      while (j < s.length && /[0-9.]/.test(s[j])) { if (s[j] === '.') dots++; j++; }
+      if (dots > 1) throw new Error('ZAHL');
+      const v = parseFloat(s.slice(i, j));
+      if (isNaN(v)) throw new Error('ZAHL');
+      toks.push({ t: 'num', v }); i = j; continue;
+    }
+    if (/[a-z]/.test(ch)) {
+      let j = i;
+      while (j < s.length && /[a-z]/.test(s[j])) j++;
+      const word = s.slice(i, j);
+      if (word === 'x') toks.push({ t: 'x' });
+      else if (word === 'e') toks.push({ t: 'e' });
+      else if (word === 'sin' || word === 'cos' || word === 'exp') toks.push({ t: 'func', name: word });
+      else throw new Error('CHAR');
+      i = j; continue;
+    }
+    if ('+-*/^()'.includes(ch)) { toks.push({ t: ch }); i++; continue; }
+    throw new Error('CHAR');
+  }
+  // Implizite Multiplikation: 2x, 2(, )x, )(, 2sin(, )sin(, 2e, )e ...
+  const out = [];
+  for (const tk of toks) {
+    if (out.length) {
+      const p = out[out.length - 1];
+      const pEnds = (p.t === 'num' || p.t === 'x' || p.t === 'e' || p.t === ')');
+      const nStarts = (tk.t === 'x' || tk.t === 'e' || tk.t === '(' || tk.t === 'func');
+      const pEnds2 = (p.t === 'x' || p.t === 'e' || p.t === ')');
+      if ((pEnds && nStarts) || (pEnds2 && tk.t === 'num')) out.push({ t: '*' });
+    }
+    out.push(tk);
+  }
+  return out;
+}
+
+function parseTokens(toks) {
+  let pos = 0;
+  const peek = () => toks[pos];
+  const next = () => toks[pos++];
+  function expr() {
+    let node = term();
+    while (peek() && (peek().t === '+' || peek().t === '-')) {
+      const op = next().t;
+      const rhs = term();
+      node = op === '+' ? { op: 'add', a: node, b: rhs } : { op: 'sub', a: node, b: rhs };
+    }
+    return node;
+  }
+  function term() {
+    let node = unary();
+    while (peek() && (peek().t === '*' || peek().t === '/')) {
+      const op = next().t;
+      const rhs = unary();
+      node = op === '*' ? { op: 'mul', a: node, b: rhs } : { op: 'div', a: node, b: rhs };
+    }
+    return node;
+  }
+  function unary() {
+    if (peek() && peek().t === '-') { next(); return { op: 'neg', a: unary() }; }
+    if (peek() && peek().t === '+') { next(); return unary(); }
+    return power();
+  }
+  function power() {
+    const base = atom();
+    if (peek() && peek().t === '^') { next(); return { op: 'pow', a: base, b: unary() }; }
+    return base;
+  }
+  function atom() {
+    const tk = next();
+    if (!tk) throw new Error('ENDE');
+    if (tk.t === 'num') return { op: 'num', v: tk.v };
+    if (tk.t === 'x') return { op: 'x' };
+    if (tk.t === 'e') return { op: 'e' };
+    if (tk.t === 'func') {
+      const open = next();
+      if (!open || open.t !== '(') throw new Error('KLAMMER');
+      const arg = expr();
+      const close = next();
+      if (!close || close.t !== ')') throw new Error('KLAMMER');
+      return { op: 'fn', name: tk.name, a: arg };
+    }
+    if (tk.t === '(') {
+      const e = expr();
+      const close = next();
+      if (!close || close.t !== ')') throw new Error('KLAMMER');
+      return e;
+    }
+    throw new Error('TOKEN');
+  }
+  const result = expr();
+  if (pos !== toks.length) throw new Error('ENDE');
+  return result;
+}
+
+function parseInput(raw) {
+  const s = preprocess(raw);
+  if (!s) return { ok: false, code: 'EMPTY' };
+  let toks;
+  try { toks = tokenize(s); } catch (e) { return { ok: false, code: e.message }; }
+  if (!toks.length) return { ok: false, code: 'EMPTY' };
+  try { return { ok: true, ast: parseTokens(toks) }; }
+  catch (e) { return { ok: false, code: e.message }; }
+}
+
+function compile(n) {
+  switch (n.op) {
+    case 'num': { const v = n.v; return () => v; }
+    case 'x': return x => x;
+    case 'e': return () => Math.E;
+    case 'add': { const a = compile(n.a), b = compile(n.b); return x => a(x) + b(x); }
+    case 'sub': { const a = compile(n.a), b = compile(n.b); return x => a(x) - b(x); }
+    case 'mul': { const a = compile(n.a), b = compile(n.b); return x => a(x) * b(x); }
+    case 'div': { const a = compile(n.a), b = compile(n.b); return x => { const d = b(x); return d === 0 ? NaN : a(x) / d; }; }
+    case 'neg': { const a = compile(n.a); return x => -a(x); }
+    case 'pow': { const a = compile(n.a), b = compile(n.b); return x => Math.pow(a(x), b(x)); }
+    case 'fn': {
+      const a = compile(n.a);
+      if (n.name === 'sin') return x => Math.sin(a(x));
+      if (n.name === 'cos') return x => Math.cos(a(x));
+      return x => Math.exp(a(x));
+    }
+  }
+  throw new Error('NODE');
+}
+
+/* AST -> KaTeX-Vorschau */
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+function toFraction(dec) {
+  for (let d = 1; d <= 12; d++) {
+    const n = dec * d;
+    if (Math.abs(n - Math.round(n)) < 1e-6) {
+      const num = Math.round(n), g = gcd(Math.abs(num), d) || 1;
+      return [num / g, d / g];
+    }
+  }
+  return null;
+}
+function numLatex(v) {
+  if (Number.isInteger(v)) return String(v);
+  const fr = toFraction(v);
+  if (fr && fr[1] !== 1) return '\\frac{' + fr[0] + '}{' + fr[1] + '}';
+  return String(parseFloat(v.toFixed(4))).replace('.', '{,}');
+}
+const PREC = { add: 1, sub: 1, mul: 2, div: 2, neg: 2, pow: 4, num: 5, x: 5, e: 5, fn: 5 };
+function astLatex(n, minPrec = 0) {
+  const wrap = s => (PREC[n.op] < minPrec ? '\\left(' + s + '\\right)' : s);
+  switch (n.op) {
+    case 'num': return numLatex(n.v);
+    case 'x': return 'x';
+    case 'e': return 'e';
+    case 'fn': return '\\' + n.name + '\\left(' + astLatex(n.a, 0) + '\\right)';
+    case 'neg': return wrap('-' + astLatex(n.a, 3));
+    case 'add': return wrap(astLatex(n.a, 1) + ' + ' + astLatex(n.b, 1));
+    case 'sub': {
+      const b = n.b;
+      const inner = (b.op === 'neg') ? '\\left(' + astLatex(b, 0) + '\\right)' : astLatex(b, 2);
+      return wrap(astLatex(n.a, 1) + ' - ' + inner);
+    }
+    case 'mul': {
+      const joint = (n.a.op === 'num') ? '' : ' \\cdot ';
+      const right = (n.b.op === 'neg') ? '\\left(' + astLatex(n.b, 0) + '\\right)' : astLatex(n.b, 2);
+      return wrap(astLatex(n.a, 2) + joint + right);
+    }
+    case 'div': return wrap('\\frac{' + astLatex(n.a, 0) + '}{' + astLatex(n.b, 0) + '}');
+    case 'pow': return wrap(astLatex(n.a, 4) + '^{' + astLatex(n.b, 0) + '}');
+  }
+  return '?';
+}
+
+/* Numerischer Vergleich */
+const CHECK_POINTS = [-2, -1.5, -1, -0.5, -0.25, 0, 0.25, 0.5, 1, 1.5, 2];
+function functionsEqual(fu, fs) {
+  for (const x of CHECK_POINTS) {
+    const u = fu(x), s = fs(x);
+    if (!isFinite(u) || !isFinite(s)) return false;
+    if (Math.abs(u - s) > 1e-6 * (1 + Math.abs(s))) return false;
+  }
+  return true;
+}
+
+/* ============================================================
+   AUFGABEN: f(x) = a * g(bx + c)   (KEIN addierter Wert mehr!)
+     e^ :  F = (a/b) * e^(bx+c)
+     sin:  F = -(a/b) * cos(bx+c)
+     cos:  F = (a/b) * sin(bx+c)
+============================================================ */
+const TOTAL_TASKS = 5, MAX_ATTEMPTS = 3;
+const TYPES = ['exp', 'sin', 'cos'];
+
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function generateTask() {
+  let a = 0;
+  while (a === 0) a = randInt(-5, 5);
+  const b = pick([1, -1, 2, -2, 3, -3]);
+  const c = randInt(-4, 4);
+  return { type: pick(TYPES), a, b, c, attempts: 0, correct: false, exhausted: false };
+}
+
+function innerLatex(b, c) {
+  let s = b === 1 ? 'x' : (b === -1 ? '-x' : b + 'x');
+  if (c > 0) s += ' + ' + c;
+  else if (c < 0) s += ' - ' + (-c);
+  return s;
+}
+function coreLatex(t) {
+  const inn = innerLatex(t.b, t.c);
+  if (t.type === 'exp') return 'e^{' + inn + '}';
+  if (t.type === 'sin') return '\\sin\\left(' + inn + '\\right)';
+  return '\\cos\\left(' + inn + '\\right)';
+}
+function leadCoef(k) {
+  if (k === 1) return '';
+  if (k === -1) return '-';
+  const sign = k < 0 ? '-' : '';
+  const fr = toFraction(Math.abs(k));
+  if (fr && fr[1] !== 1) return sign + '\\frac{' + fr[0] + '}{' + fr[1] + '}';
+  return sign + (fr ? fr[0] : parseFloat(Math.abs(k).toFixed(4)));
+}
+function taskLatex(t) {
+  return 'f(x) = ' + leadCoef(t.a) + coreLatex(t);
+}
+function solutionLatex(t) {
+  const k = t.a / t.b;
+  let K, core;
+  if (t.type === 'exp') { K = k; core = 'e^{' + innerLatex(t.b, t.c) + '}'; }
+  else if (t.type === 'sin') { K = -k; core = '\\cos\\left(' + innerLatex(t.b, t.c) + '\\right)'; }
+  else { K = k; core = '\\sin\\left(' + innerLatex(t.b, t.c) + '\\right)'; }
+  return 'F(x) = ' + leadCoef(K) + core + ' + C';
+}
+function solutionFn(t) {
+  const k = t.a / t.b;
+  if (t.type === 'exp') return x => k * Math.exp(t.b * x + t.c);
+  if (t.type === 'sin') return x => -k * Math.cos(t.b * x + t.c);
+  return x => k * Math.sin(t.b * x + t.c);
+}
+function ruleText(t) {
+  const inn = 'bx+c';
+  if (t.type === 'exp') return '∫ e^(' + inn + ') dx = (1/b)·e^(' + inn + ')';
+  if (t.type === 'sin') return '∫ sin(' + inn + ') dx = −(1/b)·cos(' + inn + ')';
+  return '∫ cos(' + inn + ') dx = (1/b)·sin(' + inn + ')';
+}
+
+/* ============================================================
+   STATE (Keys: mathe-schreck-lin2-*)
+============================================================ */
+let state = { currentTask: 0, tasks: [], submitted: false };
+
+function saveState() {
+  lsSet('mathe-schreck-lin2-state', state);
+  SCORM.setValue('cmi.suspend_data', JSON.stringify(state));
+  SCORM.commit();
+}
+function loadState() {
+  const s = lsGet('mathe-schreck-lin2-state', null);
+  if (s && Array.isArray(s.tasks) && s.tasks.length === TOTAL_TASKS) { state = s; return true; }
+  return false;
+}
+function taskDone(t) { return !!(t.correct || t.exhausted); }
+
+function normalizeState() {
+  if (!Array.isArray(state.tasks)) state.tasks = [];
+  state.tasks = state.tasks.map(t => {
+    if (!t || !TYPES.includes(t.type) || typeof t.a !== 'number' || typeof t.b !== 'number' || t.b === 0) return generateTask();
+    return {
+      type: t.type, a: t.a, b: t.b,
+      c: (typeof t.c === 'number' ? t.c : 0),
+      attempts: (typeof t.attempts === 'number' ? t.attempts : 0),
+      correct: !!t.correct,
+      exhausted: !!(t.exhausted || t.solutionShown)
+    };
+  });
+  while (state.tasks.length < TOTAL_TASKS) state.tasks.push(generateTask());
+  state.tasks.length = TOTAL_TASKS;
+  if (typeof state.currentTask !== 'number' || state.currentTask < 0) state.currentTask = 0;
+  if (state.currentTask > TOTAL_TASKS - 1) state.currentTask = TOTAL_TASKS - 1;
+  while (state.currentTask < TOTAL_TASKS - 1 && taskDone(state.tasks[state.currentTask])) state.currentTask++;
+  state.submitted = !!state.submitted;
+}
+
+let resetArmed = false, resetTimer = null;
+function onReset() {
+  if (!resetArmed) {
+    resetArmed = true;
+    els.btnReset.textContent = '⚠️';
+    resetTimer = setTimeout(() => { resetArmed = false; els.btnReset.textContent = '🔄'; }, 3000);
+    return;
+  }
+  clearTimeout(resetTimer);
+  try {
+    const kill = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.indexOf('mathe-schreck-lin') === 0) kill.push(k);   // löscht lin + lin2
+    }
+    kill.forEach(k => localStorage.removeItem(k));
+  } catch (e) {}
+  location.reload();
+}
+
+/* ============================================================
+   UI
+============================================================ */
+const els = {};
+function cacheElements() {
+  const ids = ['app','loading-screen','task-function','user-input','live-preview','syntax-feedback',
+   'btn-confirm','btn-next','feedback-section','submit-section','btn-submit','submit-tooltip',
+   'theme-toggle','theme-icon','fullscreen-btn','modal','modal-body','keypad-wrap','dot-bar',
+   'btn-reset','lock-banner'];
+  ids.forEach(id => {
+    els[id.replace(/-([a-z])/g, (m, c) => c.toUpperCase())] = document.getElementById(id);
+  });
+  els.dots = [0,1,2,3,4].map(i => document.getElementById('dot-' + i));
+}
+
+function updateDots() {
+  for (let i = 0; i < TOTAL_TASKS; i++) {
+    let cls = 'progress-dot ';
+    if (i < state.currentTask) cls += taskDone(state.tasks[i]) ? 'completed' : 'inactive';
+    else if (i === state.currentTask) cls += taskDone(state.tasks[i]) ? 'completed' : 'current';
+    else cls += 'inactive';
+    els.dots[i].className = cls;
+  }
+  els.dotBar.setAttribute('aria-label', 'Fortschritt: Aufgabe ' + (state.currentTask + 1) + ' von 5');
+}
+
+function renderTask() {
+  const t = state.tasks[state.currentTask];
+  if (!t) return;
+
+  renderKatex(els.taskFunction, taskLatex(t), true);
+  updateDots();
+
+  const done = taskDone(t);
+  const locked = state.submitted;
+
+  els.userInput.disabled = done || locked;
+  els.btnConfirm.disabled = done || locked;
+  els.btnNext.disabled = !done || state.currentTask >= TOTAL_TASKS - 1 || locked;
+
+  if (locked) {
+    els.lockBanner.classList.remove('hidden');
+    els.lockBanner.innerHTML = '🔒 <strong>Session bereits an Moodle übermittelt.</strong> Aufgaben gesperrt. Für einen neuen Test: oben rechts <strong>🔄</strong> zweimal klicken.';
+  } else {
+    els.lockBanner.classList.add('hidden');
+  }
+
+  if (!done && !locked) {
+    if (t.attempts === 0) {
+      els.userInput.value = '';
+      els.livePreview.textContent = '—';
+      els.syntaxFeedback.innerHTML = '';
+      els.feedbackSection.innerHTML = '';
+    }
+    setTimeout(() => { if (els.userInput && !els.userInput.disabled) els.userInput.focus(); }, 100);
+  } else if (done && !locked) {
+    renderFeedback(t.correct
+      ? '<strong>✅ Richtig!</strong> Weiter mit „Nächste Aufgabe“.'
+      : '<strong>Aufgabe abgeschlossen.</strong> Weiter mit „Nächste Aufgabe“.', t.correct ? 'success' : 'warning');
+  }
+
+  if (state.currentTask === TOTAL_TASKS - 1 && done) showSubmitSection();
+}
+
+function showSubmitSection() {
+  els.submitSection.classList.remove('hidden');
+  const allDone = state.tasks.every(taskDone);
+  els.btnSubmit.disabled = !allDone || state.submitted;
+  els.submitTooltip.textContent = allDone ? '' : 'Erst alle 5 Aufgaben bearbeiten';
+}
+
+function renderFeedback(html, type) {
+  els.feedbackSection.innerHTML = '<div class="feedback-area feedback-' + type + '">' + html + '</div>';
+  renderAllKatex(els.feedbackSection);
+}
+
+function renderKatex(el, latex, display = false) {
+  try { if (window.katex) katex.render(latex, el, { displayMode: display, throwOnError: false }); else el.textContent = latex; }
+  catch (e) { el.textContent = latex; }
+}
+function renderAllKatex(root) {
+  root.querySelectorAll('[data-katex]').forEach(el => {
+    renderKatex(el, el.getAttribute('data-katex'), el.hasAttribute('data-display'));
+  });
+}
+
+/* ============================================================
+   EINGABE & BESTÄTIGUNG (Test-Modus: nur richtig/falsch)
+============================================================ */
+function onInput() {
+  const raw = els.userInput.value;
+  if (!raw.trim()) {
+    els.livePreview.textContent = '—';
+    els.syntaxFeedback.innerHTML = '<span class="opacity-60">⚠️ Leere Eingabe</span>';
+    return;
+  }
+  const r = parseInput(raw);
+  if (!r.ok) {
+    els.livePreview.textContent = '—';
+    const msg = r.code === 'EMPTY' ? '⚠️ Leere Eingabe'
+              : r.code === 'KLAMMER' ? '⚠️ Klammern prüfen (z.B. sin(2x+1))'
+              : '⚠️ Ausdruck prüfen (Klammern/Operatoren)';
+    els.syntaxFeedback.innerHTML = '<span class="accent-red">' + msg + '</span>';
+    return;
+  }
+  const fn = compile(r.ast);
+  let finite = true;
+  for (const x of CHECK_POINTS) { if (!isFinite(fn(x))) { finite = false; break; } }
+  if (!finite) {
+    els.livePreview.textContent = '—';
+    els.syntaxFeedback.innerHTML = '<span class="accent-red">⚠️ Ausdruck prüfen (z.B. Division durch 0)</span>';
+    return;
+  }
+  renderKatex(els.livePreview, 'F(x) = ' + astLatex(r.ast, 0) + ' + C', false);
+  els.syntaxFeedback.innerHTML = '<span class="accent-green">✅ Gültiger Ausdruck</span>';
+}
+
+function onConfirm() {
+  const t = state.tasks[state.currentTask];
+  if (!t || taskDone(t) || state.submitted) return;
+
+  const r = parseInput(els.userInput.value);
+  if (!r.ok) { onInput(); return; }              // Syntaxfehler = kein Versuch
+  const fn = compile(r.ast);
+  for (const x of CHECK_POINTS) { if (!isFinite(fn(x))) { onInput(); return; } }
+
+  t.attempts++;
+  if (functionsEqual(fn, solutionFn(t))) {
+    t.correct = true;
+    renderFeedback('<strong>✅ Richtig!</strong>', 'success');
+  } else if (t.attempts >= MAX_ATTEMPTS) {
+    t.exhausted = true;
+    renderFeedback('<strong>❌ Falsch.</strong> Versuch ' + MAX_ATTEMPTS + ' von ' + MAX_ATTEMPTS + '.<br>Die Aufgabe zählt als bearbeitet. Die Auswertung mit Lösung und Lösungsweg erhältst du am Ende.', 'error');
+  } else {
+    renderFeedback('<strong>❌ Falsch.</strong> Versuch ' + t.attempts + ' von ' + MAX_ATTEMPTS + '.', 'error');
+  }
+  saveState();
+  renderTask();
+}
+
+function onNext() {
+  if (state.currentTask < TOTAL_TASKS - 1 && taskDone(state.tasks[state.currentTask])) {
+    state.currentTask++;
+    saveState();
+    renderTask();
+  }
+}
+
+/* ============================================================
+   AUSWERTUNG & SENDEN
+============================================================ */
+function calculateScore() {
+  let total = 0;
+  const per = state.tasks.map(t => {
+    const e = t.correct ? Math.max(0, t.attempts - 1) : MAX_ATTEMPTS;
+    total += e; return e;
+  });
+  return { score: Math.round(((TOTAL_TASKS * MAX_ATTEMPTS - total) / (TOTAL_TASKS * MAX_ATTEMPTS)) * 100), per };
+}
+function getGrade(s) {
+  if (s >= 90) return 'Ausgezeichnet 🏆';
+  if (s >= 75) return 'Sehr gut 🌟';
+  if (s >= 60) return 'Gut 👍';
+  if (s >= 40) return 'Bestanden ✓';
+  return 'Nochmal üben 📚';
+}
+
+function showResultModal() {
+  const res = calculateScore();
+  let list = '';
+  state.tasks.forEach((t, i) => {
+    const steps = t.correct ? '' :
+      '<ol class="eval-solution list-decimal ml-5 mt-2 text-sm opacity-80">' +
+      '<li>Struktur erkennen: f(x) = a·g(bx+c) mit g = ' + (t.type === 'exp' ? 'e^' : t.type) + '.</li>' +
+      '<li>Lineare Substitution: Durch die innere Ableitung b teilen → ' + ruleText(t) + '</li>' +
+      '<li>Vorfaktor berechnen (a/b) und Term zusammenfassen – + C ergänzt die App.</li></ol>';
+    list +=
+      '<div class="p-4 rounded-xl bg-gray-50 dark:bg-neutral-900 mb-3">' +
+      '<div class="flex justify-between items-center gap-2 flex-wrap"><strong>Aufgabe ' + (i + 1) + '</strong>' +
+      '<span class="' + (t.correct ? 'accent-green' : 'accent-red') + '">' +
+      (t.correct ? '✅ richtig (' + t.attempts + '. Versuch)' : '❌ falsch (' + res.per[i] + ' Fehler)') +
+      '</span></div>' +
+      '<div class="mt-1" data-katex="' + taskLatex(t) + '"></div>' +
+      '<div class="mt-2 font-semibold" data-katex="' + solutionLatex(t) + '" data-display></div>' + steps + '</div>';
+  });
+
+  els.modalBody.innerHTML =
+    '<h2 id="modal-title" class="brand-title text-2xl accent-cyan text-center mb-4">📊 Auswertung</h2>' +
+    '<div class="text-center mb-5"><div class="text-5xl font-bold accent-cyan">' + res.score + '%</div>' +
+    '<div class="text-lg mt-1">' + getGrade(res.score) + '</div></div>' + list +
+    '<p class="text-sm opacity-70 mb-5 text-center">Deine Ergebnisse werden jetzt an Moodle übermittelt.</p>' +
+    '<div class="flex gap-3"><button id="modal-cancel" class="btn-secondary flex-1">Abbrechen</button>' +
+    '<button id="modal-send" class="btn-primary flex-1">Jetzt senden</button></div>';
+  renderAllKatex(els.modalBody);
+  els.modal.classList.remove('hidden');
+
+  document.getElementById('modal-cancel').onclick = () => els.modal.classList.add('hidden');
+  document.getElementById('modal-send').onclick = () => sendResults(res.score);
+}
+
+function sendResults(score) {
+  SCORM.setValue('cmi.core.score.raw', String(score));
+  SCORM.setValue('cmi.core.score.min', '0');
+  SCORM.setValue('cmi.core.score.max', '100');
+  SCORM.setValue('cmi.core.lesson_status', 'completed');
+  SCORM.setValue('cmi.core.session_time', SCORM.sessionTime());
+  SCORM.setValue('cmi.suspend_data', JSON.stringify({ ...state, submitted: true }));
+  SCORM.commit();
+
+  state.submitted = true;
+  saveState();
+  lsSet('mathe-schreck-lin2-submitted', true);
+
+  const lms = SCORM.isLMS();
+  els.modalBody.innerHTML =
+    '<div class="text-center py-6"><div class="text-6xl mb-4">' + (lms ? '✅' : '💾') + '</div>' +
+    '<h2 class="brand-title text-2xl accent-cyan mb-3">' +
+    (lms ? 'Ergebnisse erfolgreich an Moodle gesendet!' : 'Kein Moodle gefunden – Ergebnisse lokal gespeichert.') + '</h2>' +
+    '<p class="opacity-70 mb-6">Punktzahl: <strong>' + score + '%</strong> · ' + getGrade(score) + '</p>' +
+    '<button id="modal-close" class="btn-primary w-full">Schließen</button></div>';
+  document.getElementById('modal-close').onclick = () => {
+    els.modal.classList.add('hidden');
+    els.btnSubmit.disabled = true;
+    els.btnSubmit.textContent = '✅ Bereits an Moodle gesendet';
+    els.btnSubmit.classList.remove('submit-btn-glow');
+    renderTask();
+  };
+  SCORM.finish();
+}
+
+/* ============================================================
+   KEYPAD, THEME, FULLSCREEN, TASTATUR
+============================================================ */
+function onKeypad(e) {
+  const btn = e.target.closest('.keypad-btn');
+  if (!btn) return;
+  if (state.submitted || els.userInput.disabled) {
+    renderFeedback(state.submitted
+      ? '🔒 Eingabe gesperrt: Session bereits gesendet. Für einen neuen Test oben rechts 🔄 zweimal klicken.'
+      : '➡️ Diese Aufgabe ist bearbeitet. Weiter mit „Nächste Aufgabe“.', 'warning');
+    return;
+  }
+  const input = els.userInput;
+  const act = btn.dataset.action, ins = btn.dataset.insert;
+  const s = input.selectionStart != null ? input.selectionStart : input.value.length;
+  const en = input.selectionEnd != null ? input.selectionEnd : s;
+
+  if (act === 'backspace') {
+    if (s !== en) input.value = input.value.slice(0, s) + input.value.slice(en);
+    else if (s > 0) input.value = input.value.slice(0, s - 1) + input.value.slice(s);
+    input.selectionStart = input.selectionEnd = Math.max(0, s - (s === en ? 1 : 0));
+  } else if (act === 'clear') {
+    input.value = '';
+  } else if (act === 'confirm') {
+    onConfirm(); return;
+  } else if (ins) {
+    input.value = input.value.slice(0, s) + ins + input.value.slice(en);
+    input.selectionStart = input.selectionEnd = s + ins.length;
+  }
+  input.focus();
+  onInput();
+}
+
+function applyTheme(mode) {
+  document.documentElement.classList.toggle('dark', mode === 'dark');
+  els.themeIcon.textContent = mode === 'dark' ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  const next = (lsGet('mathe-schreck-mode', 'light') === 'dark') ? 'light' : 'dark';
+  lsSet('mathe-schreck-mode', next);
+  applyTheme(next);
+}
+function toggleFullscreen() {
+  try {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+  } catch (e) { console.warn('Vollbild nicht verfügbar:', e); }
+}
+
+function fatal(err) {
+  try {
+    document.getElementById('loading-screen').classList.add('hidden');
+    const app = document.getElementById('app');
+    app.classList.remove('hidden');
+    app.innerHTML = '<div class="max-w-2xl mx-auto p-6"><div class="card rounded-2xl p-6 feedback-error">' +
+      '<strong>⚠️ Fehler beim Start:</strong><br>' + (err && err.message ? err.message : String(err)) +
+      '<br><button class="btn-primary mt-4" onclick="try{localStorage.clear()}catch(e){};location.reload();">Zurücksetzen & neu laden</button></div></div>';
+  } catch (e) {}
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+async function init() {
+  cacheElements();
+
+  els.userInput.addEventListener('input', onInput);
+  els.btnConfirm.addEventListener('click', onConfirm);
+  els.btnNext.addEventListener('click', onNext);
+  els.btnSubmit.addEventListener('click', showResultModal);
+  els.themeToggle.addEventListener('click', toggleTheme);
+  els.fullscreenBtn.addEventListener('click', toggleFullscreen);
+  els.btnReset.addEventListener('click', onReset);
+  els.keypadWrap.addEventListener('click', onKeypad);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && document.activeElement === els.userInput) { e.preventDefault(); onConfirm(); }
+  });
+
+  applyTheme(lsGet('mathe-schreck-mode', 'light'));
+  SCORM.init();
+
+  try { await document.fonts.ready; } catch (e) {}
+  await new Promise(res => {
+    if (window.katex) return res();
+    const iv = setInterval(() => { if (window.katex) { clearInterval(iv); res(); } }, 100);
+    setTimeout(() => { clearInterval(iv); res(); }, 5000);
+  });
+
+  loadState();
+  normalizeState();
+
+  if (lsGet('mathe-schreck-lin2-submitted', false)) state.submitted = true;
+
+  els.loadingScreen.classList.add('hidden');
+  els.app.classList.remove('hidden');
+
+  renderTask();
+
+  if (state.submitted) {
+    showSubmitSection();
+    els.btnSubmit.disabled = true;
+    els.btnSubmit.textContent = '✅ Bereits an Moodle gesendet';
+    els.btnSubmit.classList.remove('submit-btn-glow');
+  }
+
+  saveState();
+  window.addEventListener('beforeunload', () => { SCORM.commit(); SCORM.finish(); });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => init().catch(fatal));
+} else {
+  init().catch(fatal);
+}
+</script>
+</body>
+</html>
