@@ -1,35 +1,57 @@
-# Mathe_SCORM_Apps
+# Mathe-Schreck – Mathematik-Lernapps für Moodle / SCORM
 
-Geplante Sammlung von HTML-Mathe-Apps für Moodle – jeweils als **SCORM-1.2-Lernpaket** mit einheitlichem Design.
+**Interaktive Mathematikübungen mit vorbereiteter Anbindung an ein Lernmanagementsystem.**
 
-> **Projektstart · 14.10.2026:** Dieses Repository enthält bislang ausschließlich diese README. Es gibt noch keine fertigen Apps oder ZIP-Pakete; Live-Tests in Moodle wurden noch nicht durchgeführt.
+Dieses Projekt entwickelt HTML-Mathe-Apps für den Einsatz als SCORM-1.2-Lernpakete in Moodle. Im Mittelpunkt stehen die Bearbeitung von Aufgaben, eine Auswertung auf der Skala 0–100 und die Übermittlung des Ergebnisses an das LMS.
 
-## Konzept
+## Aktueller Stand
 
-- Jede App enthält **exakt 5 Fragen** und folgt einem einheitlichen, übersichtlichen Design.
-- Nach der Bearbeitung werden die Antworten über einen **Abgabe-Button** eingereicht und ausgewertet.
-- Die Punktzahl liegt zwischen **0 und 100**. Als Konvention gelten bei fünf gleich gewichteten Fragen **20 Punkte je richtiger Antwort**.
-- Die Apps sollen ihre Ergebnisse über die SCORM-1.2-API an das LMS übermitteln.
+Es sind inzwischen **zwei HTML-Anwendungen mit SCORM-Wrapper** vorhanden. Das Projekt ist damit über die reine Konzeptphase hinaus. Die Paketierung und eine erfolgreiche Ende-zu-Ende-Prüfung in Moodle sind durch den hier geprüften Repository-Stand jedoch noch nicht belegt.
 
-## Geplante SCORM-Anbindung
+| Datei | Inhalt |
+|---|---|
+| [stmfkten-plnme.html](stmfkten-plnme.html) | Stammfunktions-Akademie für Polynome |
+| [stammfkt-vktete-Fkten.html](stammfkt-vktete-Fkten.html) | Stammfunktions-Akademie für linear verkettete Funktionen |
+| [imsmanifest.xml](imsmanifest.xml) | Vorhandenes Manifest, dessen Startdatei-Zuordnung noch anzupassen ist |
 
-Die Kommunikation verwendet `LMSInitialize`, `LMSGetValue`, `LMSSetValue`, `LMSCommit` und `LMSFinish`. Vorgesehen sind `cmi.core.score.raw` für die erreichte Punktzahl sowie `cmi.core.score.min = 0` und `cmi.core.score.max = 100`.
+Die Dateilinks oben öffnen den Quellcode auf GitHub, keine veröffentlichte Live-Demo. Fertige ZIP-Pakete sind im aktuellen Dateibaum nicht enthalten.
 
-Nach der Abgabe wird `cmi.core.lesson_status` auf `completed` gesetzt. `passed` oder `failed` kommen nur infrage, wenn für die jeweilige App eine ausdrückliche Bestehensgrenze definiert ist; derzeit ist keine festgelegt.
+## Lernkonzept
 
-## Geplante Struktur und Paketierung
+Das zugrunde liegende Konzept sieht kurze Übungseinheiten mit fünf Aufgaben, mathematischer Eingabe, einer abschließenden Abgabe und einer Bewertung zwischen 0 und 100 vor. Bei fünf gleich gewichteten Aufgaben entspricht eine richtige Antwort 20 Punkten.
 
-```text
-apps/<app-name>/   # Quelldateien der jeweiligen HTML-App
-packages/         # SCORM-1.2-ZIP-Pakete für Moodle
-```
+Die Anwendungen verbinden die Eingabe von Stammfunktionen mit mathematischer Darstellung und einer Auswertung. Das Projekt behandelt sowohl die fachliche Übung als auch die technische Einbindung in einen digitalen Kurs.
 
-Diese Verzeichnisse sind lediglich geplant und noch nicht angelegt. Jedes spätere ZIP-Paket muss eine **`imsmanifest.xml` direkt im ZIP-Wurzelverzeichnis** enthalten. Die im Manifest bezeichneten Ressourcen, die HTML-Startdatei und die Zuordnung als SCO müssen mit dem tatsächlichen Paketinhalt übereinstimmen.
+## Was im Code bereits vorhanden ist
 
-## Nutzung in Moodle – vorgesehen
+Die beiden Apps enthalten einen SCORM-1.2-Wrapper einschließlich Initialisierung, Setzen von Werten, Commit und Abschluss der Sitzung. Der Auswertungscode schreibt unter anderem:
 
-1. Das fertige ZIP-Paket in Moodle als Aktivität **Lernpaket / SCORM** hochladen.
-2. Die Notenbewertung passend konfigurieren: Bewertungsmethode **Höchstnote**, Punktebereich beziehungsweise Maximalbewertung passend zur Skala **0–100**.
-3. Mit einem Testkonto prüfen, ob Start, Abgabe, Punktzahl, Abschlussstatus und Übernahme ins Notenbuch wie vorgesehen funktionieren.
+- `cmi.core.score.raw`, `cmi.core.score.min` und `cmi.core.score.max` für die Punktzahl auf der Skala 0–100.
+- `cmi.core.lesson_status = completed` für den Bearbeitungsabschluss.
+- `cmi.suspend_data` für Zustandsdaten.
+- `cmi.core.session_time` für die Sitzungszeit.
 
-Die SCORM-Anbindung allein garantiert keine automatische Notenübernahme: Diese hängt auch von der Moodle-Konfiguration ab. Eine externe Moodle-Authentifizierung oder Einrichtung ist nicht Bestandteil des Projekts. Beim lokalen Offline-Start besteht kein Zugriff auf das Moodle-Notenbuch.
+`completed` bedeutet hier abgeschlossen, nicht automatisch bestanden. Ohne erreichbare LMS-Schnittstelle verwenden die Apps lokale Speichermechanismen als Fallback; daraus entsteht keine Übertragung ins Moodle-Notenbuch.
+
+## Noch offen: korrektes Paket und Moodle-Test
+
+**Das vorhandene Manifest verweist auf `index.html`. Diese Datei ist im aktuellen Repository nicht vorhanden.** Daher darf der Repository-Inhalt nicht unverändert als fertig geprüftes SCORM-Paket beschrieben werden.
+
+Für ein auslieferbares Paket sind folgende Schritte vorgesehen:
+
+1. Die gewünschte App als Startdatei festlegen und die Ressourcenangaben im Manifest mit den tatsächlichen Dateinamen abgleichen.
+2. Alle benötigten Paketdateien zusammenstellen; `imsmanifest.xml` muss direkt im ZIP-Wurzelverzeichnis liegen.
+3. Das ZIP in Moodle als Aktivität „Lernpaket / SCORM“ importieren und die Bewertung passend zur Skala 0–100 konfigurieren. Die ursprünglich vorgesehene Bewertungsmethode ist „Höchstnote“; die konkrete Kurskonfiguration ist zu prüfen.
+4. Mit einem Testkonto Start, Bearbeitung, Abgabe, Punktzahl, Abschlussstatus, Wiederaufnahme und Übernahme ins Notenbuch prüfen.
+
+Eine implementierte SCORM-Schnittstelle allein belegt noch keine erfolgreiche Notenübernahme. Diese hängt auch vom korrekten Paket und der Moodle-Konfiguration ab. Externe Bibliotheken der HTML-Apps benötigen zudem eine erreichbare Internetverbindung.
+
+## Weiterentwicklung
+
+Die ursprünglich geplanten Verzeichnisse `apps/<app-name>/` und `packages/` sind noch nicht angelegt. Sie können später Quellmodule und geprüfte ZIP-Pakete voneinander trennen. Weitere Themen und ein einheitliches Design bleiben Entwicklungsziele.
+
+## Projektprofil
+
+Das Projekt verbindet die Gestaltung mathematischer Übungen mit Fragen der LMS-Integration: Wie werden Bearbeitungsstand und Ergebnisse erfasst, übergeben und im Kurs nutzbar gemacht? Der aktuelle Stand wird bewusst als Entwicklungsprojekt dokumentiert.
+
+**Ein Projekt von Kai · [GitHub-Profil](https://github.com/schreeckkai)**
